@@ -8,10 +8,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: dangernoodle-io/.github/.github/actions/checkout@jae/initial
+        uses: dangernoodle-io/.github/.github/actions/checkout@main
 
       - name: Build
-        uses: dangernoodle-io/.github/.github/actions/maven@jae/initial
+        uses: dangernoodle-io/.github/.github/actions/maven@main
         with:
           maven-goal: verify
           central-user: ${{ secrets.BUILD_BOT_CENTRAL_USER }}
