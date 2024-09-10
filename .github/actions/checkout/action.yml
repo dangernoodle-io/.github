@@ -1,0 +1,11 @@
+name: Checkout
+description: Checkout
+
+runs:
+  using: composite
+  steps:
+    - uses: actions/checkout@v4
+
+    - name: Git config
+      shell: bash
+      run: ${{ github.action_path }}/git-config.sh
