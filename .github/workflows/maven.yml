@@ -1,0 +1,48 @@
+name: maven
+
+on:
+  workflow_call:
+    inputs:
+      maven-args:
+        default: ''
+        description: Additional maven args
+        required: false
+        type: string
+      maven-goals:
+        default: ''
+        description: Override maven goal(s)
+        required: false
+        type: string
+      release:
+        default: false
+        description: Is release
+        required: false
+        type: boolean
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: dangernoodle-io/.github/.github/actions/checkout@main
+
+      - if: inputs.release == false
+        name: Build
+        uses: dangernoodle-io/.github/.github/actions/maven@main
+        with:
+          maven-args: ${{ inputs.maven-args }}
+          maven-goals: ${{ inputs.maven-goals == '' && 'verify' || inputs.maven-goals }}
+          coveralls-token: ${{ secrets.COVERALLS_REPO_TOKEN }}
+
+      - if: inputs.release == true
+        name: Release
+        uses: dangernoodle-io/.github/.github/actions/maven@main
+        with:
+          maven-args: ${{ inputs.maven-args }}
+          maven-goals: ${{ inputs.maven-goals == '' && 'release:prepare release:perform' || inputs.maven-goals }}
+          central-user: ${{ secrets.BUILD_BOT_CENTRAL_USER }}
+          central-token: ${{ secrets.BUILD_BOT_CENTRAL_TOKEN }}
+          coveralls-token: ${{ secrets.COVERALLS_REPO_TOKEN }}
+          gpg-passphrase: ${{ secrets.BUILD_BOT_GPG_PASSPHRASE }}
+          gpg-private-key: ${{ secrets.BUILD_BOT_GPG_PRIVATE_KEY }}
+          ssh-private-key: ${{ secrets.BUILD_BOT_SSH_PRIVATE_KEY }}

@@ -14,8 +14,12 @@ inputs:
     description: Coveralls repo token
     required: false
     default: ''
-  maven-goal:
-    description: Maven goal(s)
+  maven-args:
+    description: Maven additional cli arguments
+    required: false
+    default: ''
+  maven-goals:
+    description: Maven goal(s) overrides
     required: true
   maven-version:
     description: Maven version
@@ -57,11 +61,11 @@ runs:
       with:
         maven-version: ${{ inputs.maven-version }}
 
-    - run: mvn -V -B help:active-profiles ${{ inputs.maven-goal }}
+    - run: mvn -V -B ${{ inputs.maven-args }} help:active-profiles ${{ inputs.maven-goals }}
       shell: bash
       env:
         MAVEN_OPTS: -Xms1024m -Xmx2024m -XX:+TieredCompilation -XX:TieredStopAtLevel=1
         COVERALLS_REPO_TOKEN: ${{ inputs.coveralls-token }}
-        MAVEN_USERNAME: ${{ inputs.central_user }}
-        MAVEN_CENTRAL_TOKEN: ${{ inputs.central_token }}
-        MAVEN_GPG_PASSPHRASE: ${{ inputs.MAVEN_GPG_PASSPHRASE }}
+        MAVEN_USERNAME: ${{ inputs.central-user }}
+        MAVEN_CENTRAL_TOKEN: ${{ inputs.central-token }}
+        MAVEN_GPG_PASSPHRASE: ${{ inputs.gpg-passphrase }}
