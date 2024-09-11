@@ -1,7 +1,11 @@
-## Workflow Templates
+## Composite Actions
 
-- `maven-build.yml` : used for pull requests and code pushed to `main`
-- `maven-release.yml`: used for running the maven release process
+- `actions/checkout`: checkout and configure `git`
+- `actions/maven` : configure `ssh` (releases), setup java and maven
+
+## Reusable Workflows
+
+- `workflows/maven.yml`: maven builds and releases
 
 ## GitHub Slack App
 ```
