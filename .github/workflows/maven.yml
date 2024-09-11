@@ -13,6 +13,11 @@ on:
         description: Override maven goal(s)
         required: false
         type: string
+      maven-version:
+        default: 3.9.9
+        description: Maven version
+        required: false
+        type: string
       release:
         default: false
         description: Is release
@@ -24,25 +29,48 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: dangernoodle-io/.github/.github/actions/checkout@main
+        uses: actions/checkout@v4
 
-      - if: inputs.release == false
-        name: Build
-        uses: dangernoodle-io/.github/.github/actions/maven@main
+      - if: ${{ inputs.release }}
+        name: GPG Agent Setup
+        uses: crazy-max/ghaction-import-gpg@v6
         with:
-          maven-args: ${{ inputs.maven-args }}
-          maven-goals: ${{ inputs.maven-goals == '' && 'verify' || inputs.maven-goals }}
-          coveralls-token: ${{ secrets.COVERALLS_REPO_TOKEN }}
+          git_committer_name: dangernoodle build bot
+          git_committer_email: build-bot@dangernoodle.io
+          git_commit_gpgsign: true
+          git_tag_gpgsign: true
+          git_user_signingkey: true
+          gpg_private_key: ${{ secrets.BUILD_BOT_GPG_PRIVATE_KEY }}
+          passphrase: ${{ secrets.BUILD_BOT_GPG_PASSPHRASE }}
+          trust_level: 5
 
-      - if: inputs.release == true
-        name: Release
-        uses: dangernoodle-io/.github/.github/actions/maven@main
+      - if: ${{ inputs.release }}
+        name: SSH Agent Setup
+        uses: webfactory/ssh-agent@v0.9.0
         with:
-          maven-args: ${{ inputs.maven-args }}
-          maven-goals: ${{ inputs.maven-goals == '' && 'release:prepare release:perform' || inputs.maven-goals }}
-          central-user: ${{ secrets.BUILD_BOT_CENTRAL_USER }}
-          central-token: ${{ secrets.BUILD_BOT_CENTRAL_TOKEN }}
-          coveralls-token: ${{ secrets.COVERALLS_REPO_TOKEN }}
-          gpg-passphrase: ${{ secrets.BUILD_BOT_GPG_PASSPHRASE }}
-          gpg-private-key: ${{ secrets.BUILD_BOT_GPG_PRIVATE_KEY }}
           ssh-private-key: ${{ secrets.BUILD_BOT_SSH_PRIVATE_KEY }}
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+          cache: maven
+          server-id: central
+          server-username: MAVEN_USERNAME
+          server-password: MAVEN_CENTRAL_TOKEN
+
+      - name: Setup Maven
+        uses: stCarolas/setup-maven@v5
+        with:
+          maven-version: ${{ inputs.maven-version }}
+
+      - name: ${{ inputs.release && 'Release' || 'Build'}}
+        run: mvn -V -B ${{ inputs.maven-args }} help:active-profiles ${{ inputs.maven-goals }}
+        shell: bash
+        env:
+          CICD: true
+          MAVEN_OPTS: -Xms1024m -Xmx2024m -XX:+TieredCompilation -XX:TieredStopAtLevel=1
+          COVERALLS_REPO_TOKEN: ${{ inputs.coveralls-token }}
+          MAVEN_USERNAME: ${{ inputs.central-user }}
+          MAVEN_CENTRAL_TOKEN: ${{ inputs.central-token }}
