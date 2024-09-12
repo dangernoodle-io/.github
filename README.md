@@ -1,8 +1,3 @@
-## Composite Actions
-
-- `actions/checkout`: checkout and configure `git`
-- `actions/maven` : configure `ssh` (releases), setup java and maven
-
 ## Reusable Workflows
 
 - `workflows/maven.yml`: maven builds and releases
