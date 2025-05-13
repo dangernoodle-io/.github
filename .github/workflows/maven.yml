@@ -26,11 +26,14 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    permissions: read-all
     steps:
       - name: Checkout
         uses: actions/checkout@v4
         with:
+          fetch-depth: ${{ github.event_name == 'pull_request_target' && 0 || 1 }}
           persist-credentials: false
+          ref: ${{ github.event_name == 'pull_request_target' && github.event.pull_request.head.sha || '' }}
 
       - if: ${{ inputs.release }}
         name: GPG Agent Setup
@@ -67,12 +70,10 @@ jobs:
           maven-version: ${{ inputs.maven-version }}
 
       - name: ${{ inputs.release && 'Release' || 'Build'}}
-        run: mvn -V -B ${{ inputs.maven-args }} help:active-profiles ${{ inputs.maven-goals }}
+        run: mvn -V -B -ntp ${{ inputs.maven-args }} help:active-profiles ${{ inputs.maven-goals }}
         shell: bash
         env:
-          CICD: true
           COVERALLS_REPO_TOKEN: ${{ secrets.COVERALLS_REPO_TOKEN }}
           MAVEN_OPTS: -Xms1024m -Xmx2024m -XX:+TieredCompilation -XX:TieredStopAtLevel=1
-            -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn
-          MAVEN_USERNAME: ${{ secrets.BUILD_BOT_CENTRAL_USER }}
-          MAVEN_CENTRAL_TOKEN: ${{ secrets.BUILD_BOT_CENTRAL_TOKEN }}
+          MAVEN_USERNAME: ${{ inputs.release && secrets.BUILD_BOT_CENTRAL_USER || '' }}
+          MAVEN_CENTRAL_TOKEN: ${{ inputs.release && secrets.BUILD_BOT_CENTRAL_TOKEN || '' }}
