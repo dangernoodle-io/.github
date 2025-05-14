@@ -3,6 +3,11 @@ name: maven
 on:
   workflow_call:
     inputs:
+      enable-coveralls:
+        default: true
+        description: Enable Coveralls
+        required: false
+        type: boolean
       maven-args:
         default: ''
         description: Additional maven args
@@ -30,9 +35,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
         with:
-          fetch-depth: ${{ github.event_name == 'pull_request_target' && 0 || 1 }}
           persist-credentials: false
-          ref: ${{ github.event_name == 'pull_request_target' && github.event.pull_request.head.sha || '' }}
 
       - if: ${{ inputs.release }}
         name: GPG Agent Setup
@@ -72,7 +75,10 @@ jobs:
         run: mvn -V -B -ntp ${{ inputs.maven-args }} help:active-profiles ${{ inputs.maven-goals }}
         shell: bash
         env:
-          COVERALLS_REPO_TOKEN: ${{ secrets.COVERALLS_REPO_TOKEN }}
           MAVEN_OPTS: -Xms1024m -Xmx2024m -XX:+TieredCompilation -XX:TieredStopAtLevel=1
           MAVEN_USERNAME: ${{ inputs.release && secrets.BUILD_BOT_CENTRAL_USER || '' }}
           MAVEN_CENTRAL_TOKEN: ${{ inputs.release && secrets.BUILD_BOT_CENTRAL_TOKEN || '' }}
+
+      - if: ${{ inputs.enable-coveralls }}
+        name: Coveralls
+        uses: coverallsapp/github-action@v2
