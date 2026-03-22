@@ -33,13 +33,13 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           persist-credentials: false
 
       - if: ${{ inputs.release }}
         name: GPG Agent Setup
-        uses: crazy-max/ghaction-import-gpg@v6
+        uses: crazy-max/ghaction-import-gpg@v7
         with:
           git_committer_name: dangernoodle build bot
           git_committer_email: build-bot@dangernoodle.io
@@ -52,12 +52,12 @@ jobs:
 
       - if: ${{ inputs.release }}
         name: SSH Agent Setup
-        uses: webfactory/ssh-agent@v0.9.0
+        uses: webfactory/ssh-agent@v0.10.0
         with:
           ssh-private-key: ${{ secrets.BUILD_BOT_SSH_PRIVATE_KEY }}
 
       - name: Setup Java
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v5
         with:
           distribution: temurin
           java-version: 21
@@ -67,7 +67,7 @@ jobs:
           server-password: MAVEN_CENTRAL_TOKEN
 
       - name: Setup Maven
-        uses: stCarolas/setup-maven@v5
+        uses: stCarolas/setup-maven@v5.1
         with:
           maven-version: ${{ inputs.maven-version }}
 
