@@ -37,9 +37,17 @@ support). Coverage uploaded to Coveralls on 1.14 only.
 |---|---|---|
 | `enable-coveralls` | `true` | Set `false` for repos not using Coveralls |
 
-### `.github/workflows/terraform-provider-release.yml`
+### `.github/workflows/go-test.yml`
 
-Reusable Terraform provider release workflow. Runs GoReleaser with GPG signing.
+Reusable Go CI workflow. Runs build, lint (golangci-lint), and tests with coverage.
+
+| Input | Default | Notes |
+|---|---|---|
+| `enable-coveralls` | `true` | Set `false` for repos not using Coveralls |
+
+### `.github/workflows/go-release.yml`
+
+Reusable Go release workflow. Runs GoReleaser with GPG signing. Each calling repo provides its own `.goreleaser.yml`.
 
 Requires org secrets: `BUILD_BOT_GPG_PRIVATE_KEY`, `BUILD_BOT_GPG_PASSPHRASE`.
 

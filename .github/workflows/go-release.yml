@@ -1,4 +1,4 @@
-name: terraform-provider-release
+name: go-release
 
 on:
   workflow_call:

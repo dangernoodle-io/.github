@@ -50,16 +50,37 @@ jobs:
 
 ---
 
-### `terraform-provider-release.yml`
+### `go-test.yml`
 
-Releases a Terraform provider via GoReleaser with GPG signing.
+Runs build, lint, and tests for Go projects with optional Coveralls coverage.
+
+**Inputs**
+
+| Input | Type | Default | Description |
+|---|---|---|---|
+| `enable-coveralls` | boolean | `true` | Upload coverage to Coveralls |
+
+**Usage**
+
+```yaml
+jobs:
+  test:
+    uses: dangernoodle-io/.github/.github/workflows/go-test.yml@main
+    secrets: inherit
+```
+
+---
+
+### `go-release.yml`
+
+Releases a Go project via GoReleaser with GPG signing. Requires a `.goreleaser.yml` in the calling repo.
 
 **Usage**
 
 ```yaml
 jobs:
   release:
-    uses: dangernoodle-io/.github/.github/workflows/terraform-provider-release.yml@main
+    uses: dangernoodle-io/.github/.github/workflows/go-release.yml@main
     secrets: inherit
 ```
 
