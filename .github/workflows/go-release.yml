@@ -35,11 +35,6 @@ jobs:
           gpg_private_key: ${{ secrets.BUILD_BOT_GPG_PRIVATE_KEY }}
           passphrase: ${{ secrets.BUILD_BOT_GPG_PASSPHRASE }}
           trust_level: 5
-      - if: ${{ inputs.homebrew }}
-        name: SSH Agent Setup
-        uses: webfactory/ssh-agent@v0.10.0
-        with:
-          ssh-private-key: ${{ secrets.BUILD_BOT_SSH_PRIVATE_KEY }}
       - name: Run GoReleaser
         uses: goreleaser/goreleaser-action@v7
         with:
@@ -48,3 +43,4 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GPG_FINGERPRINT: ${{ steps.import_gpg.outputs.fingerprint }}
           HOMEBREW: ${{ inputs.homebrew }}
+          SSH_PRIVATE_KEY: ${{ inputs.homebrew && secrets.BUILD_BOT_SSH_PRIVATE_KEY || '' }}
