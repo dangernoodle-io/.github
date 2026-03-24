@@ -50,7 +50,7 @@ jobs:
 
 ---
 
-### `go-test.yml`
+### `go-build.yml`
 
 Runs build, lint, and tests for Go projects with optional Coveralls coverage.
 
@@ -64,8 +64,8 @@ Runs build, lint, and tests for Go projects with optional Coveralls coverage.
 
 ```yaml
 jobs:
-  test:
-    uses: dangernoodle-io/.github/.github/workflows/go-test.yml@main
+  build:
+    uses: dangernoodle-io/.github/.github/workflows/go-build.yml@main
     secrets: inherit
 ```
 
@@ -75,12 +75,20 @@ jobs:
 
 Releases a Go project via GoReleaser with GPG signing. Requires a `.goreleaser.yml` in the calling repo.
 
+**Inputs**
+
+| Input | Type | Default | Description |
+|---|---|---|---|
+| `homebrew` | boolean | `false` | Publish Homebrew formula to tap repo |
+
 **Usage**
 
 ```yaml
 jobs:
   release:
     uses: dangernoodle-io/.github/.github/workflows/go-release.yml@main
+    with:
+      homebrew: true
     secrets: inherit
 ```
 

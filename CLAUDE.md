@@ -37,9 +37,9 @@ support). Coverage uploaded to Coveralls on 1.14 only.
 |---|---|---|
 | `enable-coveralls` | `true` | Set `false` for repos not using Coveralls |
 
-### `.github/workflows/go-test.yml`
+### `.github/workflows/go-build.yml`
 
-Reusable Go CI workflow. Runs build, lint (golangci-lint), and tests with coverage.
+Reusable Go CI workflow. Single `verify` job that runs build, lint (golangci-lint), and tests with coverage.
 
 | Input | Default | Notes |
 |---|---|---|
@@ -48,6 +48,10 @@ Reusable Go CI workflow. Runs build, lint (golangci-lint), and tests with covera
 ### `.github/workflows/go-release.yml`
 
 Reusable Go release workflow. Runs GoReleaser with GPG signing. Each calling repo provides its own `.goreleaser.yml`.
+
+| Input | Default | Notes |
+|---|---|---|
+| `homebrew` | `false` | Publish Homebrew formula to tap repo |
 
 Requires org secrets: `BUILD_BOT_GPG_PRIVATE_KEY`, `BUILD_BOT_GPG_PASSPHRASE`.
 
