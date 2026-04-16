@@ -1,0 +1,58 @@
+name: marketplace-update
+description: Update dangernoodle-marketplace manifest with new plugin ref and push signed commit
+
+inputs:
+  plugin-name:
+    description: Name matching an entry in .claude-plugin/marketplace.json
+    required: true
+  ref:
+    description: Git tag/ref to set (e.g. v0.3.1)
+    required: true
+  ssh-private-key:
+    description: SSH private key for marketplace repo access
+    required: true
+  gpg-private-key:
+    description: GPG private key for signing commits
+    required: true
+  gpg-passphrase:
+    description: GPG passphrase for unlocking the private key
+    required: true
+
+runs:
+  using: composite
+  steps:
+    - name: Import GPG key
+      uses: crazy-max/ghaction-import-gpg@v7
+      with:
+        git_committer_name: dangernoodle build bot
+        git_committer_email: build-bot@dangernoodle.io
+        git_commit_gpgsign: true
+        trust_level: 5
+        gpg_private_key: ${{ inputs.gpg-private-key }}
+        passphrase: ${{ inputs.gpg-passphrase }}
+
+    - name: Set up SSH agent
+      uses: webfactory/ssh-agent@v0.9.0
+      with:
+        ssh-private-key: ${{ inputs.ssh-private-key }}
+
+    - name: Update marketplace manifest
+      shell: bash
+      run: |
+        git clone git@github.com:dangernoodle-io/dangernoodle-marketplace.git marketplace-repo
+        cd marketplace-repo
+
+        # Update marketplace.json: set source.ref for matching plugin
+        jq_filter="(.[] | select(.name == \"${{ inputs.plugin-name }}\") | .source.ref) |= \"${{ inputs.ref }}\""
+        jq "$jq_filter" .claude-plugin/marketplace.json > marketplace.json.tmp
+        mv marketplace.json.tmp .claude-plugin/marketplace.json
+
+        # Check if there are changes
+        if git diff --quiet .claude-plugin/marketplace.json; then
+          echo "No changes to marketplace.json for ${{ inputs.plugin-name }}"
+          exit 0
+        fi
+
+        git add .claude-plugin/marketplace.json
+        git commit -S -m "chore: bump ${{ inputs.plugin-name }} to ${{ inputs.ref }}"
+        git push origin main

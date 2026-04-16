@@ -80,6 +80,8 @@ Releases a Go project via GoReleaser with GPG signing. Requires a `.goreleaser.y
 | Input | Type | Default | Description |
 |---|---|---|---|
 | `homebrew` | boolean | `false` | Publish Homebrew formula to tap repo |
+| `marketplace` | boolean | `false` | Update dangernoodle-marketplace ref after release |
+| `plugin-name` | string | `''` | Plugin name in marketplace.json (required when marketplace=true) |
 
 **Usage**
 
@@ -89,6 +91,18 @@ jobs:
     uses: dangernoodle-io/.github/.github/workflows/go-release.yml@main
     with:
       homebrew: true
+    secrets: inherit
+```
+
+To update the marketplace manifest after release:
+
+```yaml
+jobs:
+  release:
+    uses: dangernoodle-io/.github/.github/workflows/go-release.yml@main
+    with:
+      marketplace: true
+      plugin-name: my-plugin
     secrets: inherit
 ```
 
