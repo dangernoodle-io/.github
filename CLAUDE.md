@@ -55,6 +55,15 @@ Reusable Go release workflow. Runs GoReleaser with GPG signing. Each calling rep
 
 Requires org secrets: `BUILD_BOT_GPG_PRIVATE_KEY`, `BUILD_BOT_GPG_PASSPHRASE`.
 
+### `.github/workflows/plugin-test.yml`
+
+Reusable Claude Code plugin test workflow. Runs `tests/run.sh` inside the plugin directory using Node.js built-in `node:test` runner. Zero npm deps required.
+
+| Input | Default | Notes |
+|---|---|---|
+| `node-version` | `'20'` | Node.js version for test runner |
+| `plugin-path` | `'plugin'` | Path to plugin directory (must contain `tests/run.sh`) |
+
 ## Conventions
 
 - Workflows must use `workflow_call` trigger to be reusable

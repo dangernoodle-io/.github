@@ -94,6 +94,27 @@ jobs:
 
 ---
 
+### `plugin-test.yml`
+
+Runs tests for Claude Code plugins using Node.js built-in `node:test` runner. Executes `tests/run.sh` in the plugin directory.
+
+**Inputs**
+
+| Input | Type | Default | Description |
+|---|---|---|---|
+| `node-version` | string | `'20'` | Node.js version for test runner |
+| `plugin-path` | string | `'plugin'` | Path to plugin directory (must contain `tests/run.sh`) |
+
+**Usage**
+
+```yaml
+jobs:
+  plugin-tests:
+    uses: dangernoodle-io/.github/.github/workflows/plugin-test.yml@main
+```
+
+---
+
 ## GitHub Slack App
 ```
 /github subscribe dangernoodle-io/<repo>

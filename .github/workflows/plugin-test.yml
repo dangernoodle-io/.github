@@ -1,0 +1,30 @@
+name: plugin-test
+
+on:
+  workflow_call:
+    inputs:
+      node-version:
+        default: '20'
+        description: Node.js version for test runner
+        required: false
+        type: string
+      plugin-path:
+        default: 'plugin'
+        description: Path to plugin directory (contains tests/run.sh)
+        required: false
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ inputs.node-version }}
+      - name: Run plugin tests
+        run: bash ${{ inputs.plugin-path }}/tests/run.sh
