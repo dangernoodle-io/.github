@@ -8,6 +8,16 @@ on:
         description: Enable Homebrew tap
         required: false
         type: boolean
+      marketplace:
+        default: false
+        description: Update dangernoodle-marketplace ref after release
+        required: false
+        type: boolean
+      plugin-name:
+        default: ''
+        description: Plugin name in marketplace.json (required when marketplace=true)
+        required: false
+        type: string
 
 permissions:
   contents: write
@@ -44,3 +54,18 @@ jobs:
           GPG_FINGERPRINT: ${{ steps.import_gpg.outputs.fingerprint }}
           HOMEBREW: ${{ inputs.homebrew }}
           SSH_PRIVATE_KEY: ${{ inputs.homebrew && secrets.BUILD_BOT_SSH_PRIVATE_KEY || '' }}
+      - name: Checkout workflows repo for marketplace-update action
+        if: inputs.marketplace
+        uses: actions/checkout@v6
+        with:
+          repository: dangernoodle-io/.github
+          path: .github-workflows-src
+      - name: Update marketplace
+        if: inputs.marketplace
+        uses: ./.github-workflows-src/.github/actions/marketplace-update
+        with:
+          plugin-name: ${{ inputs.plugin-name }}
+          ref: ${{ github.ref_name }}
+          ssh-private-key: ${{ secrets.BUILD_BOT_SSH_PRIVATE_KEY }}
+          gpg-private-key: ${{ secrets.BUILD_BOT_GPG_PRIVATE_KEY }}
+          gpg-passphrase: ${{ secrets.BUILD_BOT_GPG_PASSPHRASE }}

@@ -52,8 +52,10 @@ Reusable Go release workflow. Runs GoReleaser with GPG signing. Each calling rep
 | Input | Default | Notes |
 |---|---|---|
 | `homebrew` | `false` | Publish Homebrew formula to tap repo |
+| `marketplace` | `false` | Update dangernoodle-marketplace ref after release |
+| `plugin-name` | `''` | Plugin name in marketplace.json (required when marketplace=true) |
 
-Requires org secrets: `BUILD_BOT_GPG_PRIVATE_KEY`, `BUILD_BOT_GPG_PASSPHRASE`.
+Requires org secrets: `BUILD_BOT_GPG_PRIVATE_KEY`, `BUILD_BOT_GPG_PASSPHRASE`. When using marketplace mode, also requires `BUILD_BOT_SSH_PRIVATE_KEY`.
 
 ### `.github/workflows/plugin-test.yml`
 
@@ -63,6 +65,22 @@ Reusable Claude Code plugin test workflow. Runs `tests/run.sh` inside the plugin
 |---|---|---|
 | `node-version` | `'20'` | Node.js version for test runner |
 | `plugin-path` | `'plugin'` | Path to plugin directory (must contain `tests/run.sh`) |
+
+## Composite Actions
+
+### `.github/actions/marketplace-update`
+
+Composite action to update the dangernoodle-marketplace manifest with a new plugin ref and push a signed commit.
+
+| Input | Required | Notes |
+|---|---|---|
+| `plugin-name` | yes | Name matching an entry in `.claude-plugin/marketplace.json` |
+| `ref` | yes | Git tag/ref to set (e.g. `v0.3.1`) |
+| `ssh-private-key` | yes | SSH private key for marketplace repo access |
+| `gpg-private-key` | yes | GPG private key for signing commits |
+| `gpg-passphrase` | yes | GPG passphrase for unlocking the private key |
+
+Clones `dangernoodle-marketplace`, uses `jq` to update `.claude-plugin/marketplace.json` with the new ref, commits with GPG signing, and pushes to origin/main. Designed to be called from `go-release.yml` post-release.
 
 ## Conventions
 
