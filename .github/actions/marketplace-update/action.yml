@@ -43,7 +43,7 @@ runs:
         cd marketplace-repo
 
         # Update marketplace.json: set source.ref for matching plugin
-        jq_filter="(.[] | select(.name == \"${{ inputs.plugin-name }}\") | .source.ref) |= \"${{ inputs.ref }}\""
+        jq_filter="(.plugins[] | select(.name == \"${{ inputs.plugin-name }}\") | .source.ref) |= \"${{ inputs.ref }}\""
         jq "$jq_filter" .claude-plugin/marketplace.json > marketplace.json.tmp
         mv marketplace.json.tmp .claude-plugin/marketplace.json
 
