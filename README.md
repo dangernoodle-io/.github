@@ -129,6 +129,55 @@ jobs:
 
 ---
 
+### `gh-release.yml`
+
+Publishes a GitHub release with optional assets and custom release notes preamble.
+
+**Inputs**
+
+| Input | Type | Default | Description |
+|---|---|---|---|
+| `tag` | string | `''` | Tag to release (defaults to the calling ref if empty) |
+| `assets-artifact` | string | `''` | Optional artifact name whose files become release assets |
+| `notes-preamble-artifact` | string | `''` | Optional artifact name containing a markdown file to prepend to auto-generated notes |
+| `wait-for-check` | string | `''` | Optional check name to wait for before publishing |
+
+**Usage**
+
+```yaml
+jobs:
+  release:
+    uses: dangernoodle-io/.github/.github/workflows/gh-release.yml@main
+    with:
+      tag: v1.0.0
+      assets-artifact: build-artifacts
+    secrets: inherit
+```
+
+---
+
+### `auto-label-conventional.yml`
+
+Labels pull requests based on conventional-commit prefix in the title.
+
+**Inputs**
+
+None.
+
+**Usage**
+
+```yaml
+on:
+  pull_request:
+    types: [opened, edited, synchronize]
+
+jobs:
+  auto-label:
+    uses: dangernoodle-io/.github/.github/workflows/auto-label-conventional.yml@main
+```
+
+---
+
 ## GitHub Slack App
 ```
 /github subscribe dangernoodle-io/<repo>
