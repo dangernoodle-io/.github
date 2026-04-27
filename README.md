@@ -140,7 +140,6 @@ Publishes a GitHub release with optional assets and custom release notes preambl
 | `tag` | string | `''` | Tag to release (defaults to the calling ref if empty) |
 | `assets-artifact` | string | `''` | Optional artifact name whose files become release assets |
 | `notes-preamble-artifact` | string | `''` | Optional artifact name containing a markdown file to prepend to auto-generated notes |
-| `wait-for-check` | string | `''` | Optional check name to wait for before publishing |
 
 **Usage**
 

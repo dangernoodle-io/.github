@@ -15,10 +15,6 @@ on:
         description: "Optional artifact name containing a single markdown file prepended to auto-generated notes."
         type: string
         default: ""
-      wait-for-check:
-        description: "Optional check name to wait for before publishing."
-        type: string
-        default: ""
 
 permissions:
   contents: write
@@ -30,15 +26,6 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
-
-      - name: Wait for check
-        if: inputs.wait-for-check != ''
-        uses: lewagon/wait-on-check-action@v1.3.4
-        with:
-          ref: ${{ github.sha }}
-          check-name: ${{ inputs.wait-for-check }}
-          repo-token: ${{ secrets.GITHUB_TOKEN }}
-          wait-interval: 20
 
       - name: Download assets
         if: inputs.assets-artifact != ''
