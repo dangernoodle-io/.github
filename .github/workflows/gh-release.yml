@@ -1,0 +1,76 @@
+name: gh-release
+
+on:
+  workflow_call:
+    inputs:
+      tag:
+        description: "Tag to release. Defaults to the calling ref."
+        type: string
+        default: ""
+      assets-artifact:
+        description: "Optional artifact name whose files become release assets."
+        type: string
+        default: ""
+      notes-preamble-artifact:
+        description: "Optional artifact name containing a single markdown file prepended to auto-generated notes."
+        type: string
+        default: ""
+      wait-for-check:
+        description: "Optional check name to wait for before publishing."
+        type: string
+        default: ""
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Wait for check
+        if: inputs.wait-for-check != ''
+        uses: lewagon/wait-on-check-action@v1.3.4
+        with:
+          ref: ${{ github.sha }}
+          check-name: ${{ inputs.wait-for-check }}
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+          wait-interval: 20
+
+      - name: Download assets
+        if: inputs.assets-artifact != ''
+        uses: actions/download-artifact@v4
+        with:
+          name: ${{ inputs.assets-artifact }}
+          path: release-assets
+
+      - name: Download notes preamble
+        if: inputs.notes-preamble-artifact != ''
+        uses: actions/download-artifact@v4
+        with:
+          name: ${{ inputs.notes-preamble-artifact }}
+          path: release-preamble
+
+      - name: Publish release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAG: ${{ inputs.tag != '' && inputs.tag || github.ref_name }}
+        run: |
+          set -euo pipefail
+          ASSETS=""
+          if [ -d release-assets ]; then
+            ASSETS=$(find release-assets -type f | tr '\n' ' ')
+          fi
+          PREAMBLE=""
+          if [ -d release-preamble ]; then
+            PREAMBLE=$(find release-preamble -type f -name '*.md' | head -n1)
+          fi
+          gh release create "$TAG" $ASSETS \
+            --repo "$GITHUB_REPOSITORY" \
+            --title "$TAG" \
+            --generate-notes \
+            ${PREAMBLE:+--notes-file "$PREAMBLE"} \
+            --verify-tag
