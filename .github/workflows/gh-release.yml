@@ -41,6 +41,35 @@ jobs:
           name: ${{ inputs.notes-preamble-artifact }}
           path: release-preamble
 
+      - name: Materialize release-notes config
+        run: |
+          mkdir -p .github
+          cat > .github/release.yml <<'EOF'
+          changelog:
+            exclude:
+              labels: [skip-changelog]
+              authors: [dependabot]
+            categories:
+              - title: New Components
+                labels: [new-component]
+              - title: New APIs
+                labels: [enhancement, feature]
+              - title: Fixes
+                labels: [bug, fix]
+              - title: Performance
+                labels: [performance]
+              - title: Refactors
+                labels: [refactor]
+              - title: Documentation
+                labels: [documentation]
+              - title: Tests
+                labels: [test]
+              - title: Build
+                labels: [build, ci]
+              - title: Other Changes
+                labels: ["*"]
+          EOF
+
       - name: Publish release
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}

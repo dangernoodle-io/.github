@@ -131,7 +131,7 @@ jobs:
 
 ### `gh-release.yml`
 
-Publishes a GitHub release with optional assets and custom release notes preamble.
+Publishes a GitHub release with optional assets and custom release notes preamble. Automatically materializes `.github/release.yml` at runtime to configure release notes categories, ensuring consistent categorization across all repos without per-repo config files.
 
 **Inputs**
 
@@ -157,7 +157,7 @@ jobs:
 
 ### `auto-label-conventional.yml`
 
-Labels pull requests based on conventional-commit prefix in the title.
+Labels pull requests based on conventional-commit prefix in the title. Supports all standard conventional types: `feat(new-component)`, `feat`, `fix`, `docs`, `refactor`, `perf`, `test`, `chore`, `build`, `ci`, `style`, and `revert`.
 
 **Inputs**
 
