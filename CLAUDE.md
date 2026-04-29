@@ -66,6 +66,16 @@ Reusable Claude Code plugin test workflow. Runs `tests/run.sh` inside the plugin
 | `node-version` | `'20'` | Node.js version for test runner |
 | `plugin-path` | `'plugin'` | Path to plugin directory (must contain `tests/run.sh`) |
 
+### `.github/workflows/gh-release.yml`
+
+Reusable release workflow that materializes `.github/release.yml` at runtime before invoking `gh release create --generate-notes`. Centralized config — consuming repos no longer need their own copy.
+
+Release notes categories: New Components, New APIs, Fixes, Performance, Refactors, Documentation, Tests, Build, Other Changes.
+
+### `.github/workflows/auto-label-conventional.yml`
+
+Reusable workflow that auto-labels PRs by conventional-commit type in the title. Labels all standard types: `feat(new-component)` → new-component; `feat` → enhancement; `fix` → bug; `docs` → documentation; `refactor` → refactor; `perf` → performance; `test` → test; `chore` → chore; `build` → build; `ci` → ci; `style` → style; `revert` → revert.
+
 ## Composite Actions
 
 ### `.github/actions/marketplace-update`

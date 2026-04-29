@@ -15,8 +15,17 @@ jobs:
             const title = context.payload.pull_request.title;
             const map = [
               [/^feat\(new-component\)/i, 'new-component'],
-              [/^feat[:(]/i, 'enhancement'],
-              [/^fix[:(]/i, 'bug'],
+              [/^feat[:(]/i,     'enhancement'],
+              [/^fix[:(]/i,      'bug'],
+              [/^docs[:(]/i,     'documentation'],
+              [/^refactor[:(]/i, 'refactor'],
+              [/^perf[:(]/i,     'performance'],
+              [/^test[:(]/i,     'test'],
+              [/^chore[:(]/i,    'chore'],
+              [/^build[:(]/i,    'build'],
+              [/^ci[:(]/i,       'ci'],
+              [/^style[:(]/i,    'style'],
+              [/^revert[:(]/i,   'revert'],
             ];
             for (const [re, label] of map) {
               if (re.test(title)) {
