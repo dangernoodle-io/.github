@@ -2,49 +2,62 @@
 
 Shared GitHub Actions workflows consumed by other `dangernoodle-io` repositories.
 
-### `maven.yml`
+| Workflow | Purpose |
+|---|---|
+| [`auto-label-conventional.yml`](#auto-label-conventionalyml) | Label PRs from conventional-commit prefix in the title |
+| [`gh-release.yml`](#gh-releaseyml) | Publish a GitHub release with shared release-notes config |
+| [`go-build.yml`](#go-buildyml) | Build, lint, and test Go projects |
+| [`go-release.yml`](#go-releaseyml) | Release a Go project via GoReleaser with GPG signing |
+| [`maven.yml`](#mavenyml) | Build and optionally release Maven projects |
+| [`pio-test.yml`](#pio-testyml) | PlatformIO host tests + cppcheck + gcovr coverage |
+| [`plugin-test.yml`](#plugin-testyml) | Test Claude Code plugins via `node:test` |
+| [`terraform-provider-test.yml`](#terraform-provider-testyml) | Test Terraform providers across version matrix |
 
-Builds and optionally releases Maven projects.
+---
+
+### `auto-label-conventional.yml`
+
+Labels pull requests based on conventional-commit prefix in the title. Supports all standard conventional types: `feat(new-component)`, `feat`, `fix`, `docs`, `refactor`, `perf`, `test`, `chore`, `build`, `ci`, `style`, and `revert`.
 
 **Inputs**
 
-| Input | Type | Default | Description |
-|---|---|---|---|
-| `maven-goals` | string | — | Maven goal(s) to run (required) |
-| `maven-args` | string | `''` | Additional Maven arguments |
-| `maven-version` | string | `3.9.9` | Maven version |
-| `enable-coveralls` | boolean | `true` | Upload coverage to Coveralls |
-| `release` | boolean | `false` | Enable release mode (GPG + SSH setup, Maven Central deploy) |
+None.
 
 **Usage**
 
 ```yaml
+on:
+  pull_request:
+    types: [opened, edited, synchronize]
+
 jobs:
-  build:
-    uses: dangernoodle-io/.github/.github/workflows/maven.yml@main
-    with:
-      maven-goals: verify
-    secrets: inherit
+  auto-label:
+    uses: dangernoodle-io/.github/.github/workflows/auto-label-conventional.yml@main
 ```
 
 ---
 
-### `terraform-provider-test.yml`
+### `gh-release.yml`
 
-Runs build, lint, code generation diff check, and acceptance tests across a Terraform version matrix (1.8–1.14).
+Publishes a GitHub release with optional assets and custom release notes preamble. Automatically materializes `.github/release.yml` at runtime to configure release notes categories, ensuring consistent categorization across all repos without per-repo config files.
 
 **Inputs**
 
 | Input | Type | Default | Description |
 |---|---|---|---|
-| `enable-coveralls` | boolean | `true` | Upload coverage to Coveralls (runs on 1.14 only) |
+| `tag` | string | `''` | Tag to release (defaults to the calling ref if empty) |
+| `assets-artifact` | string | `''` | Optional artifact name whose files become release assets |
+| `notes-preamble-artifact` | string | `''` | Optional artifact name containing a markdown file to prepend to auto-generated notes |
 
 **Usage**
 
 ```yaml
 jobs:
-  test:
-    uses: dangernoodle-io/.github/.github/workflows/terraform-provider-test.yml@main
+  release:
+    uses: dangernoodle-io/.github/.github/workflows/gh-release.yml@main
+    with:
+      tag: v1.0.0
+      assets-artifact: build-artifacts
     secrets: inherit
 ```
 
@@ -108,6 +121,33 @@ jobs:
 
 ---
 
+### `maven.yml`
+
+Builds and optionally releases Maven projects.
+
+**Inputs**
+
+| Input | Type | Default | Description |
+|---|---|---|---|
+| `maven-goals` | string | — | Maven goal(s) to run (required) |
+| `maven-args` | string | `''` | Additional Maven arguments |
+| `maven-version` | string | `3.9.9` | Maven version |
+| `enable-coveralls` | boolean | `true` | Upload coverage to Coveralls |
+| `release` | boolean | `false` | Enable release mode (GPG + SSH setup, Maven Central deploy) |
+
+**Usage**
+
+```yaml
+jobs:
+  build:
+    uses: dangernoodle-io/.github/.github/workflows/maven.yml@main
+    with:
+      maven-goals: verify
+    secrets: inherit
+```
+
+---
+
 ### `pio-test.yml`
 
 Runs PlatformIO host tests + cppcheck + gcovr coverage for embedded projects (Arduino / ESP-IDF). Caches pip, PlatformIO toolchains, and per-project libdeps so cJSON / Unity / framework downloads are reused across runs.
@@ -155,50 +195,23 @@ jobs:
 
 ---
 
-### `gh-release.yml`
+### `terraform-provider-test.yml`
 
-Publishes a GitHub release with optional assets and custom release notes preamble. Automatically materializes `.github/release.yml` at runtime to configure release notes categories, ensuring consistent categorization across all repos without per-repo config files.
+Runs build, lint, code generation diff check, and acceptance tests across a Terraform version matrix (1.8–1.14).
 
 **Inputs**
 
 | Input | Type | Default | Description |
 |---|---|---|---|
-| `tag` | string | `''` | Tag to release (defaults to the calling ref if empty) |
-| `assets-artifact` | string | `''` | Optional artifact name whose files become release assets |
-| `notes-preamble-artifact` | string | `''` | Optional artifact name containing a markdown file to prepend to auto-generated notes |
+| `enable-coveralls` | boolean | `true` | Upload coverage to Coveralls (runs on 1.14 only) |
 
 **Usage**
 
 ```yaml
 jobs:
-  release:
-    uses: dangernoodle-io/.github/.github/workflows/gh-release.yml@main
-    with:
-      tag: v1.0.0
-      assets-artifact: build-artifacts
+  test:
+    uses: dangernoodle-io/.github/.github/workflows/terraform-provider-test.yml@main
     secrets: inherit
-```
-
----
-
-### `auto-label-conventional.yml`
-
-Labels pull requests based on conventional-commit prefix in the title. Supports all standard conventional types: `feat(new-component)`, `feat`, `fix`, `docs`, `refactor`, `perf`, `test`, `chore`, `build`, `ci`, `style`, and `revert`.
-
-**Inputs**
-
-None.
-
-**Usage**
-
-```yaml
-on:
-  pull_request:
-    types: [opened, edited, synchronize]
-
-jobs:
-  auto-label:
-    uses: dangernoodle-io/.github/.github/workflows/auto-label-conventional.yml@main
 ```
 
 ---
