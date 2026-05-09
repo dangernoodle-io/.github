@@ -57,6 +57,17 @@ Reusable Go release workflow. Runs GoReleaser with GPG signing. Each calling rep
 
 Requires org secrets: `BUILD_BOT_GPG_PRIVATE_KEY`, `BUILD_BOT_GPG_PASSPHRASE`. When using marketplace mode, also requires `BUILD_BOT_SSH_PRIVATE_KEY`.
 
+### `.github/workflows/pio-test.yml`
+
+Reusable PlatformIO test workflow. Runs cppcheck + `pio test` + gcovr coverage with Coveralls upload. Caches pip (`~/.cache/pip`), PlatformIO toolchains (`~/.platformio`), and per-project libdeps (`**/.pio/libdeps`) so cJSON / Unity / framework downloads are reused across runs. Calling repo must provide a `Makefile` with `check` and `coverage` targets producing `gcovr-coveralls.json`.
+
+| Input | Default | Notes |
+|---|---|---|
+| `cppcheck-apt-install` | `false` | Set true for repos without cppcheck bundled |
+| `pre-build-script` | `''` | Shell to run before `make coverage` (e.g., webui build) |
+| `libdeps-cache-key-paths` | `**/platformio.ini` | Glob(s) hashed for libdeps cache invalidation |
+| `enable-coveralls` | `true` | Coveralls upload |
+
 ### `.github/workflows/plugin-test.yml`
 
 Reusable Claude Code plugin test workflow. Runs `tests/run.sh` inside the plugin directory using Node.js built-in `node:test` runner. Zero npm deps required.

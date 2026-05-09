@@ -108,6 +108,32 @@ jobs:
 
 ---
 
+### `pio-test.yml`
+
+Runs PlatformIO host tests + cppcheck + gcovr coverage for embedded projects (Arduino / ESP-IDF). Caches pip, PlatformIO toolchains, and per-project libdeps so cJSON / Unity / framework downloads are reused across runs.
+
+Calling repo must provide a `Makefile` with `check` (lint) and `coverage` (test + gcovr) targets. The `coverage` target should produce `gcovr-coveralls.json`.
+
+**Inputs**
+
+| Input | Type | Default | Description |
+|---|---|---|---|
+| `cppcheck-apt-install` | boolean | `false` | Install cppcheck via apt before `make check` (for repos without it bundled) |
+| `pre-build-script` | string | `''` | Shell to run before `make coverage` (e.g., asset/webui build) |
+| `libdeps-cache-key-paths` | string | `**/platformio.ini` | Glob(s) hashed for the libdeps cache key |
+| `enable-coveralls` | boolean | `true` | Upload coverage to Coveralls |
+
+**Usage**
+
+```yaml
+jobs:
+  test:
+    uses: dangernoodle-io/.github/.github/workflows/pio-test.yml@main
+    secrets: inherit
+```
+
+---
+
 ### `plugin-test.yml`
 
 Runs tests for Claude Code plugins using Node.js built-in `node:test` runner. Executes `tests/run.sh` in the plugin directory.

@@ -1,0 +1,75 @@
+name: pio-test
+
+on:
+  workflow_call:
+    inputs:
+      cppcheck-apt-install:
+        default: false
+        description: Install cppcheck via apt before make check
+        required: false
+        type: boolean
+      pre-build-script:
+        default: ''
+        description: Optional shell script to run before make coverage (e.g., asset/webui build)
+        required: false
+        type: string
+      libdeps-cache-key-paths:
+        default: '**/platformio.ini'
+        description: Glob(s) to hash for the per-project libdeps cache key
+        required: false
+        type: string
+      enable-coveralls:
+        default: true
+        description: Enable Coveralls upload
+        required: false
+        type: boolean
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.11'
+      - name: Cache pip
+        uses: actions/cache@v5
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-pio-gcovr
+      - name: Cache PlatformIO toolchains
+        uses: actions/cache@v5
+        with:
+          path: ~/.platformio
+          key: ${{ runner.os }}-pio-${{ hashFiles('**/platformio.ini') }}
+          restore-keys: ${{ runner.os }}-pio-
+      - name: Cache PlatformIO project libdeps
+        uses: actions/cache@v5
+        with:
+          path: |
+            **/.pio/libdeps
+            **/.pio/build/**/lib*
+          key: ${{ runner.os }}-pio-libdeps-${{ hashFiles(inputs.libdeps-cache-key-paths) }}
+          restore-keys: ${{ runner.os }}-pio-libdeps-
+      - name: Install cppcheck
+        if: inputs.cppcheck-apt-install
+        run: sudo apt-get update && sudo apt-get install -y cppcheck
+      - name: Install tools
+        run: pip install platformio gcovr
+      - name: Pre-build
+        if: inputs.pre-build-script != ''
+        run: ${{ inputs.pre-build-script }}
+      - name: Static analysis
+        run: make check
+      - name: Test and coverage
+        run: make coverage
+      - name: Upload to Coveralls
+        if: inputs.enable-coveralls
+        uses: coverallsapp/github-action@v2
+        with:
+          file: gcovr-coveralls.json
+          format: coveralls
