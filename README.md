@@ -9,6 +9,7 @@ Shared GitHub Actions workflows consumed by other `dangernoodle-io` repositories
 | [`go-build.yml`](#go-buildyml) | Build, lint, and test Go projects |
 | [`go-release.yml`](#go-releaseyml) | Release a Go project via GoReleaser with GPG signing |
 | [`maven.yml`](#mavenyml) | Build and optionally release Maven projects |
+| [`path-changes.yml`](#path-changesyml) | Detect changed-path filters for a PR via dorny/paths-filter |
 | [`pio-test.yml`](#pio-testyml) | PlatformIO host tests + cppcheck + gcovr coverage |
 | [`plugin-test.yml`](#plugin-testyml) | Test Claude Code plugins via `node:test` |
 | [`terraform-provider-test.yml`](#terraform-provider-testyml) | Test Terraform providers across version matrix |
@@ -148,6 +149,44 @@ jobs:
 
 ---
 
+### `path-changes.yml`
+
+Reusable `workflow_call` workflow that runs `dorny/paths-filter@v3` against a caller-supplied filters YAML and outputs a JSON array of the filter names that matched changed files. Intended to be called only on `pull_request` events.
+
+**Inputs**
+
+| Input | Type | Default | Description |
+|---|---|---|---|
+| `filters` | string | *(required)* | `dorny/paths-filter` filters YAML |
+
+**Outputs**
+
+| Output | Description |
+|---|---|
+| `changes` | JSON array of filter names that matched changed files |
+
+**Usage**
+
+```yaml
+  changes:
+    if: github.event_name == 'pull_request'
+    uses: dangernoodle-io/.github/.github/workflows/path-changes.yml@main
+    with:
+      filters: |
+        firmware:
+          - 'src/**'
+        python:
+          - 'scripts/**'
+```
+
+Downstream jobs gate on a matched filter:
+
+```yaml
+if: github.event_name == 'pull_request' && contains(fromJSON(needs.changes.outputs.changes), 'firmware')
+```
+
+---
+
 ### `pio-test.yml`
 
 Runs PlatformIO host tests + cppcheck + gcovr coverage for embedded projects (Arduino / ESP-IDF). Caches pip, PlatformIO toolchains, and per-project libdeps so cJSON / Unity / framework downloads are reused across runs.
@@ -212,6 +251,36 @@ jobs:
   test:
     uses: dangernoodle-io/.github/.github/workflows/terraform-provider-test.yml@main
     secrets: inherit
+```
+
+---
+
+## Composite Actions
+
+### `ci-result-gate`
+
+Composite action that fails unless every `required` job result is `success`, tolerates `skipped` for `optional` jobs, and fails if any `fail-on-cancelled` job is `cancelled`. Inputs are space-separated `name=result` tokens — pass `needs.<job>.result` per name.
+
+**Inputs**
+
+| Input | Type | Default | Description |
+|---|---|---|---|
+| `required` | string | *(required)* | Space-separated `name=result`; each must be `success` |
+| `optional` | string | `''` | Space-separated `name=result`; each must be `success` or `skipped` |
+| `fail-on-cancelled` | string | `''` | Space-separated `name=result`; fails if any is `cancelled` |
+
+**Usage**
+
+```yaml
+  summary:
+    if: always()
+    needs: [check, test, smoke]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: dangernoodle-io/.github/.github/actions/ci-result-gate@main
+        with:
+          required: check=${{ needs.check.result }} test=${{ needs.test.result }}
+          optional: smoke=${{ needs.smoke.result }}
 ```
 
 ---
