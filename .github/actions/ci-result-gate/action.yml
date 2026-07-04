@@ -1,0 +1,37 @@
+name: CI result gate
+description: Fail unless required jobs succeeded; listed jobs may be skipped; listed jobs must not be cancelled.
+inputs:
+  required:
+    description: 'Space-separated name=result that MUST be success'
+    required: true
+  optional:
+    description: 'Space-separated name=result allowed to be success OR skipped'
+    required: false
+    default: ''
+  fail-on-cancelled:
+    description: 'Space-separated name=result that must not be cancelled'
+    required: false
+    default: ''
+runs:
+  using: composite
+  steps:
+    - shell: bash
+      env:
+        REQUIRED: ${{ inputs.required }}
+        OPTIONAL: ${{ inputs.optional }}
+        FAIL_ON_CANCELLED: ${{ inputs.fail-on-cancelled }}
+      run: |
+        fail=0
+        for kv in $REQUIRED; do
+          n=${kv%%=*}; r=${kv#*=}
+          if [ "$r" != "success" ]; then echo "required $n=$r"; fail=1; fi
+        done
+        for kv in $OPTIONAL; do
+          n=${kv%%=*}; r=${kv#*=}
+          if [ "$r" != "success" ] && [ "$r" != "skipped" ]; then echo "optional $n=$r"; fail=1; fi
+        done
+        for kv in $FAIL_ON_CANCELLED; do
+          n=${kv%%=*}; r=${kv#*=}
+          if [ "$r" = "cancelled" ]; then echo "$n cancelled"; fail=1; fi
+        done
+        exit $fail

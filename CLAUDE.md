@@ -87,6 +87,15 @@ Release notes categories: New Components, New APIs, Fixes, Performance, Refactor
 
 Reusable workflow that auto-labels PRs by conventional-commit type in the title. Labels all standard types: `feat(new-component)` → new-component; `feat` → enhancement; `fix` → bug; `docs` → documentation; `refactor` → refactor; `perf` → performance; `test` → test; `chore` → chore; `build` → build; `ci` → ci; `style` → style; `revert` → revert.
 
+### `.github/workflows/path-changes.yml`
+
+Reusable `workflow_call` workflow that runs `dorny/paths-filter@v3` with a caller-supplied filters YAML and exposes the matched filter names as a JSON array. Intended to be called only on `pull_request` events; consumers gate downstream jobs with `contains(fromJSON(needs.<job>.outputs.changes), '<name>')`.
+
+| Input/Output | Direction | Required/Default | Notes |
+|---|---|---|---|
+| `filters` | input | required | `dorny/paths-filter` filters YAML |
+| `changes` | output | — | JSON array of filter names that matched changed files |
+
 ## Composite Actions
 
 ### `.github/actions/marketplace-update`
@@ -102,6 +111,16 @@ Composite action to update the dangernoodle-marketplace manifest with a new plug
 | `gpg-passphrase` | yes | GPG passphrase for unlocking the private key |
 
 Clones `dangernoodle-marketplace`, uses `jq` to update `.claude-plugin/marketplace.json` with the new ref, commits with GPG signing, and pushes to origin/main. Designed to be called from `go-release.yml` post-release.
+
+### `.github/actions/ci-result-gate`
+
+Composite action that fails unless every `required` job result is `success`, tolerates `skipped` for `optional` jobs, and fails if any `fail-on-cancelled` job is `cancelled`. All inputs are space-separated `name=result` tokens — pass `needs.<job>.result` per name.
+
+| Input | Required | Default | Notes |
+|---|---|---|---|
+| `required` | yes | — | Space-separated `name=result`; each must be `success` |
+| `optional` | no | `''` | Space-separated `name=result`; each must be `success` or `skipped` |
+| `fail-on-cancelled` | no | `''` | Space-separated `name=result`; fails if any is `cancelled` |
 
 ## Conventions
 

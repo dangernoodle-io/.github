@@ -1,0 +1,25 @@
+name: path-changes
+on:
+  workflow_call:
+    inputs:
+      filters:
+        description: 'dorny/paths-filter filters YAML'
+        required: true
+        type: string
+    outputs:
+      changes:
+        description: 'JSON array of filter names that matched changed files'
+        value: ${{ jobs.detect.outputs.changes }}
+permissions:
+  contents: read
+  pull-requests: read
+jobs:
+  detect:
+    runs-on: ubuntu-latest
+    outputs:
+      changes: ${{ steps.f.outputs.changes }}
+    steps:
+      - uses: dorny/paths-filter@v3
+        id: f
+        with:
+          filters: ${{ inputs.filters }}
