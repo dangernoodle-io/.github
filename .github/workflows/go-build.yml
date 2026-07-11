@@ -29,6 +29,9 @@ jobs:
         with:
           version: latest
       - run: go test -v -coverprofile=coverage.out -timeout=120s ./...
+      - name: Exclude examples from coverage
+        if: inputs.enable-coveralls
+        run: grep -v '/examples/' coverage.out > coverage.filtered.out || true; mv coverage.filtered.out coverage.out
       - if: inputs.enable-coveralls
         name: Coveralls
         uses: coverallsapp/github-action@v2
