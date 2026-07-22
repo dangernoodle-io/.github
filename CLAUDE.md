@@ -61,11 +61,25 @@ support). Coverage uploaded to Coveralls on 1.14 only.
 
 ### `.github/workflows/go-build.yml`
 
-Reusable Go CI workflow. Runs build, lint (golangci-lint), and tests with coverage. Single `verify` job.
+Reusable Go CI workflow. Runs build, lint (golangci-lint), and tests with coverage in the `build`
+job. Optional `acc` job (`needs: build`) runs `make acc` — gated on `enable-acc`, so the calling
+repo must provide a `make acc` target when enabling it.
 
 | Input | Default | Notes |
 |---|---|---|
 | `enable-coveralls` | `true` | Set `false` for repos not using Coveralls |
+| `enable-acc` | `false` | Gates the `acc` job (acceptance tests via `make acc`) |
+
+Caller wiring pattern for `enable-acc` (per-repo opt-in via a repo/org variable):
+
+```yaml
+jobs:
+  verify:
+    uses: dangernoodle-io/.github/.github/workflows/go-build.yml@main
+    with:
+      enable-acc: ${{ vars.ACC_<REPO> == '1' }}
+    secrets: inherit
+```
 
 ### `.github/workflows/go-release.yml`
 

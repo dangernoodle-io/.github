@@ -100,13 +100,16 @@ jobs:
 
 ### `go-build.yml`
 
-Runs build, lint, and tests for Go projects with optional Coveralls coverage.
+Runs build, lint, and tests for Go projects with optional Coveralls coverage (`build` job), and
+an optional `acc` job that runs `make acc` for acceptance tests. The calling repo must provide a
+`make acc` target when `enable-acc` is set.
 
 **Inputs**
 
 | Input | Type | Default | Description |
 |---|---|---|---|
 | `enable-coveralls` | boolean | `true` | Upload coverage to Coveralls |
+| `enable-acc` | boolean | `false` | Run the `acc` job (`make acc` acceptance tests) |
 
 **Usage**
 
@@ -114,6 +117,17 @@ Runs build, lint, and tests for Go projects with optional Coveralls coverage.
 jobs:
   build:
     uses: dangernoodle-io/.github/.github/workflows/go-build.yml@main
+    secrets: inherit
+```
+
+To enable acceptance tests, opt in per-repo via a repo/org variable:
+
+```yaml
+jobs:
+  build:
+    uses: dangernoodle-io/.github/.github/workflows/go-build.yml@main
+    with:
+      enable-acc: ${{ vars.ACC_<REPO> == '1' }}
     secrets: inherit
 ```
 
