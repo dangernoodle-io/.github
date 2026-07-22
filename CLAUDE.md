@@ -74,7 +74,7 @@ Reusable Claude Code plugin test workflow. Runs `tests/run.sh` inside the plugin
 
 | Input | Default | Notes |
 |---|---|---|
-| `node-version` | `'20'` | Node.js version for test runner |
+| `node-version` | `'24'` | Node.js version for test runner |
 | `plugin-path` | `'plugin'` | Path to plugin directory (must contain `tests/run.sh`) |
 
 ### `.github/workflows/gh-release.yml`

@@ -221,7 +221,7 @@ Runs tests for Claude Code plugins using Node.js built-in `node:test` runner. Ex
 
 | Input | Type | Default | Description |
 |---|---|---|---|
-| `node-version` | string | `'20'` | Node.js version for test runner |
+| `node-version` | string | `'24'` | Node.js version for test runner |
 | `plugin-path` | string | `'plugin'` | Path to plugin directory (must contain `tests/run.sh`) |
 
 **Usage**
