@@ -39,24 +39,7 @@ runs:
 
     - name: Update marketplace manifest
       shell: bash
-      run: |
-        git clone git@github.com:dangernoodle-io/dangernoodle-marketplace.git marketplace-repo
-        cd marketplace-repo
-
-        git config user.name "dangernoodle build bot"
-        git config user.email "build-bot@dangernoodle.io"
-
-        # Update marketplace.json: set source.ref for matching plugin
-        jq_filter="(.plugins[] | select(.name == \"${{ inputs.plugin-name }}\") | .source.ref) |= \"${{ inputs.ref }}\""
-        jq "$jq_filter" .claude-plugin/marketplace.json > marketplace.json.tmp
-        mv marketplace.json.tmp .claude-plugin/marketplace.json
-
-        # Check if there are changes
-        if git diff --quiet .claude-plugin/marketplace.json; then
-          echo "No changes to marketplace.json for ${{ inputs.plugin-name }}"
-          exit 0
-        fi
-
-        git add .claude-plugin/marketplace.json
-        git commit -S -m "chore: bump ${{ inputs.plugin-name }} to ${{ inputs.ref }}"
-        git push origin main
+      env:
+        PLUGIN_NAME: ${{ inputs.plugin-name }}
+        REF: ${{ inputs.ref }}
+      run: bash "${{ github.action_path }}/update.sh"
