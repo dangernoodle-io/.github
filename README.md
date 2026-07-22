@@ -14,8 +14,39 @@ Shared GitHub Actions workflows consumed by other `dangernoodle-io` repositories
 | [`plugin-test.yml`](#plugin-testyml) | Test Claude Code plugins via `node:test` |
 | [`terraform-provider-test.yml`](#terraform-provider-testyml) | Test Terraform providers across version matrix |
 
-This repo's own (non-reusable) `.github/workflows/ci.yml` runs `ci-result-gate`'s bats tests
-and gates on itself via the local (`./`) action.
+This repo's own (non-reusable) `.github/workflows/ci.yml` runs `ci-result-gate`'s bats tests,
+lints every workflow (`actionlint`), shellchecks every script under `.github/` (`shellcheck`),
+asserts `uses:` version consistency (`action-versions`), and gates on itself via the local
+(`./`) action.
+
+---
+
+## CI Scripts (`.github/scripts/ci/`)
+
+Logic for this repo's own `ci.yml` lives in scripts, not inline YAML.
+
+### `actionlint.sh`
+
+Downloads a pinned, checksum-verified `actionlint` release and lints every workflow in
+`.github/workflows/`. Bump the pinned version + checksum at the top of the script to upgrade
+actionlint.
+
+### `shellcheck-all.sh`
+
+Globs every `*.sh` under `.github/` (including composite-action scripts like
+`.github/actions/ci-result-gate/gate.sh` and `.github/actions/marketplace-update/update.sh`,
+plus the CI scripts themselves) and runs `shellcheck -x -S info` across all of them.
+
+### `assert-action-versions.sh`
+
+Scans every `uses:` in `.github/workflows/**` and `.github/actions/**` and hard-fails on any
+mismatch against an explicit `EXPECTED` table declared at the top of the script — a uniformly
+outdated repo still fails, not just internally-inconsistent pins. Bump a version there when
+intentionally upgrading an action everywhere. `uses: ./...` (local refs) are skipped; reusable
+workflow calls (`owner/repo/.github/workflows/x.yml@ref`) are skipped too, since this org's
+convention is to always call those at `@main` (see Conventions below) rather than pin a version.
+An action used but missing from the table is a hard failure, so new adoptions can't silently
+evade the check.
 
 ---
 

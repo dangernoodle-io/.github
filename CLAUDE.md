@@ -9,7 +9,26 @@ Hosts shared workflows consumed via `workflow_call` from other repos.
 ## Workflows
 
 `.github/workflows/ci.yml` is this repo's own (non-reusable) CI: runs `ci-result-gate`'s bats
-tests, then gates on itself via the local (`./`) action.
+tests, `actionlint` (workflows only), `shellcheck` (every `*.sh` under `.github/`),
+`action-versions` (`uses:` pin consistency), then gates on itself via the local (`./`) action.
+
+### `.github/scripts/ci/actionlint.sh`
+
+Runs a pinned, checksum-verified `actionlint` against `.github/workflows/`.
+
+### `.github/scripts/ci/shellcheck-all.sh`
+
+Globs every `*.sh` under `.github/` (composite-action scripts — `gate.sh`, `update.sh` — plus
+the CI scripts themselves) and runs `shellcheck -x -S info`. shellcheck is preinstalled on the
+`ubuntu-latest` runner; no explicit install needed.
+
+### `.github/scripts/ci/assert-action-versions.sh`
+
+Hard-fails on any `uses:` pin (across `.github/workflows/**` and `.github/actions/**`) that
+doesn't match the `EXPECTED` table declared at the top of the script (bump a pin there) —
+catches both cross-file drift and a uniformly-outdated repo. `./` local refs and
+reusable-workflow calls (`owner/repo/.github/workflows/x.yml@ref`, always called at `@main` per
+convention) are exempt; every other action must have a table entry or the run fails.
 
 ### `.github/workflows/maven.yml`
 

@@ -76,15 +76,15 @@ jobs:
           TAG: ${{ inputs.tag != '' && inputs.tag || github.ref_name }}
         run: |
           set -euo pipefail
-          ASSETS=""
+          ASSETS=()
           if [ -d release-assets ]; then
-            ASSETS=$(find release-assets -type f | tr '\n' ' ')
+            mapfile -d '' -t ASSETS < <(find release-assets -type f -print0)
           fi
           PREAMBLE=""
           if [ -d release-preamble ]; then
             PREAMBLE=$(find release-preamble -type f -name '*.md' | head -n1)
           fi
-          gh release create "$TAG" $ASSETS \
+          gh release create "$TAG" "${ASSETS[@]}" \
             --repo "$GITHUB_REPOSITORY" \
             --title "$TAG" \
             --generate-notes \
