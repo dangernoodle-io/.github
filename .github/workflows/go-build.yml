@@ -1,4 +1,4 @@
-name: go-test
+name: go-build
 
 on:
   workflow_call:
@@ -6,6 +6,11 @@ on:
       enable-coveralls:
         default: true
         description: Enable Coveralls
+        required: false
+        type: boolean
+      enable-acc:
+        default: false
+        description: Enable the acceptance-test job
         required: false
         type: boolean
 
@@ -39,3 +44,16 @@ jobs:
           file: coverage.out
         env:
           COVERALLS_API_TOKEN: ${{ secrets.COVERALLS_API_TOKEN }}
+
+  acc:
+    needs: build
+    if: inputs.enable-acc
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-go@v6
+        with:
+          go-version-file: 'go.mod'
+          cache: true
+      - run: make acc
