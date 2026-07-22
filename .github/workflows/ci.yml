@@ -14,13 +14,36 @@ jobs:
         run: sudo apt-get update && sudo apt-get install -y bats
       - name: Run ci-result-gate bats tests
         run: bats .github/actions/ci-result-gate/tests/gate.bats
+      - name: Run assert-action-versions bats tests
+        run: bats .github/scripts/ci/tests/assert-action-versions.bats
+
+  actionlint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - name: Lint workflows
+        run: .github/scripts/ci/actionlint.sh
+
+  shellcheck:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - name: Shellcheck all scripts under .github
+        run: .github/scripts/ci/shellcheck-all.sh
+
+  action-versions:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - name: Assert action versions are consistent
+        run: .github/scripts/ci/assert-action-versions.sh
 
   summary:
     if: always()
-    needs: [gate-tests]
+    needs: [gate-tests, actionlint, shellcheck, action-versions]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
       - uses: ./.github/actions/ci-result-gate
         with:
-          required: gate-tests=${{ needs.gate-tests.result }}
+          required: gate-tests=${{ needs.gate-tests.result }} actionlint=${{ needs.actionlint.result }} shellcheck=${{ needs.shellcheck.result }} action-versions=${{ needs.action-versions.result }}
