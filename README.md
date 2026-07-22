@@ -14,6 +14,9 @@ Shared GitHub Actions workflows consumed by other `dangernoodle-io` repositories
 | [`plugin-test.yml`](#plugin-testyml) | Test Claude Code plugins via `node:test` |
 | [`terraform-provider-test.yml`](#terraform-provider-testyml) | Test Terraform providers across version matrix |
 
+This repo's own (non-reusable) `.github/workflows/ci.yml` runs `ci-result-gate`'s bats tests
+and gates on itself via the local (`./`) action.
+
 ---
 
 ### `auto-label-conventional.yml`
@@ -259,7 +262,9 @@ jobs:
 
 ### `ci-result-gate`
 
-Composite action that fails unless every `required` job result is `success`, tolerates `skipped` for `optional` jobs, and fails if any `fail-on-cancelled` job is `cancelled`. Inputs are space-separated `name=result` tokens — pass `needs.<job>.result` per name.
+Composite action that fails unless every `required` job result is `success`, tolerates `skipped` for `optional` jobs, and fails if any `fail-on-cancelled` job is `cancelled`. Inputs are space-separated `name=result` tokens — pass `needs.<job>.result` per name. An empty (or whitespace-only/unset) `required` is a hard failure — GitHub does not actually enforce `required: true` on composite-action inputs, so a gate with no required jobs would otherwise pass silently.
+
+Covered by `bats` tests (`.github/actions/ci-result-gate/tests/gate.bats`), run by this repo's own `ci.yml` workflow.
 
 **Inputs**
 

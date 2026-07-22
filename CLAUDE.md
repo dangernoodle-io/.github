@@ -8,6 +8,9 @@ Hosts shared workflows consumed via `workflow_call` from other repos.
 
 ## Workflows
 
+`.github/workflows/ci.yml` is this repo's own (non-reusable) CI: runs `ci-result-gate`'s bats
+tests, then gates on itself via the local (`./`) action.
+
 ### `.github/workflows/maven.yml`
 
 Reusable Maven CI/CD workflow. Key inputs:
@@ -114,7 +117,7 @@ Clones `dangernoodle-marketplace`, uses `jq` to update `.claude-plugin/marketpla
 
 ### `.github/actions/ci-result-gate`
 
-Composite action that fails unless every `required` job result is `success`, tolerates `skipped` for `optional` jobs, and fails if any `fail-on-cancelled` job is `cancelled`. All inputs are space-separated `name=result` tokens — pass `needs.<job>.result` per name.
+Composite action that fails unless every `required` job result is `success`, tolerates `skipped` for `optional` jobs, and fails if any `fail-on-cancelled` job is `cancelled`. All inputs are space-separated `name=result` tokens — pass `needs.<job>.result` per name. An empty (or whitespace-only/unset) `required` is a hard failure, not a silent pass. Logic lives in `gate.sh`, covered by `tests/gate.bats`.
 
 | Input | Required | Default | Notes |
 |---|---|---|---|

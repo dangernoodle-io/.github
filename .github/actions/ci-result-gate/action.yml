@@ -20,18 +20,4 @@ runs:
         REQUIRED: ${{ inputs.required }}
         OPTIONAL: ${{ inputs.optional }}
         FAIL_ON_CANCELLED: ${{ inputs.fail-on-cancelled }}
-      run: |
-        fail=0
-        for kv in $REQUIRED; do
-          n=${kv%%=*}; r=${kv#*=}
-          if [ "$r" != "success" ]; then echo "required $n=$r"; fail=1; fi
-        done
-        for kv in $OPTIONAL; do
-          n=${kv%%=*}; r=${kv#*=}
-          if [ "$r" != "success" ] && [ "$r" != "skipped" ]; then echo "optional $n=$r"; fail=1; fi
-        done
-        for kv in $FAIL_ON_CANCELLED; do
-          n=${kv%%=*}; r=${kv#*=}
-          if [ "$r" = "cancelled" ]; then echo "$n cancelled"; fail=1; fi
-        done
-        exit $fail
+      run: bash "${{ github.action_path }}/gate.sh"

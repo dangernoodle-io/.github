@@ -1,0 +1,26 @@
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  gate-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - name: Install bats
+        run: sudo apt-get update && sudo apt-get install -y bats
+      - name: Run ci-result-gate bats tests
+        run: bats .github/actions/ci-result-gate/tests/gate.bats
+
+  summary:
+    if: always()
+    needs: [gate-tests]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: ./.github/actions/ci-result-gate
+        with:
+          required: gate-tests=${{ needs.gate-tests.result }}
